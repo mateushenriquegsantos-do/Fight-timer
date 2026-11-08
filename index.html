@@ -268,6 +268,14 @@ let timer = null;
 const startAudio = new Audio("start.mp3");
 const endAudio = new Audio("end.mp3");
 
+const AudioContextClass =
+    window.AudioContext ||
+    window.webkitAudioContext;
+
+const audioCtx = AudioContextClass
+    ? new AudioContextClass()
+    : null;
+
 startAudio.preload = "auto";
 endAudio.preload = "auto";
 
@@ -331,42 +339,34 @@ function playEndSound() {
 
 function playCountdownSound() {
 
-    const AudioContextClass =
-        window.AudioContext ||
-        window.webkitAudioContext;
+    if(!audioCtx) return;
 
-    if(!AudioContextClass) return;
-
-    const ctx = new AudioContextClass();
-
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
+    const oscillator = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
 
     oscillator.type = "square";
     oscillator.frequency.value = 1000;
 
     gain.gain.setValueAtTime(
         0.0001,
-        ctx.currentTime
+        audioCtx.currentTime
     );
 
     gain.gain.exponentialRampToValueAtTime(
         0.08,
-        ctx.currentTime + 0.01
+        audioCtx.currentTime + 0.01
     );
 
     gain.gain.exponentialRampToValueAtTime(
         0.0001,
-        ctx.currentTime + 0.08
+        audioCtx.currentTime + 0.08
     );
 
     oscillator.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(audioCtx.destination);
 
     oscillator.start();
-    oscillator.stop(ctx.currentTime + 0.08);
-
-    oscillator.onended = () => ctx.close();
+    oscillator.stop(audioCtx.currentTime + 0.08);
 }
 
 function updateUI(){
@@ -449,6 +449,10 @@ function startInterval(){
 }
 
 function toggleRunning(){
+
+    if(audioCtx && audioCtx.state === "suspended"){
+        audioCtx.resume();
+    }
 
     if(seconds === 0) return;
 
