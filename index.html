@@ -423,7 +423,7 @@ function playStartSound() {
     
 function playEndSound() {
 
-    const audio = new Audio("start.mp3");
+    const audio = new Audio("endd.mp3");
 
     audio.volume = 1;
     audio.playbackRate = 2;
@@ -541,9 +541,9 @@ function startInterval(){
                 playEndSound();
             }
 
-           // if(soundOn && seconds <= 10 && seconds > 0){
-           //     playCountdownSound();
-           // }
+            if(soundOn && seconds <= 10 && seconds > 0){
+                playCountdownSound();
+            }
 
             updateUI();
 
