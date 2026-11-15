@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+<link rel="manifest" href="manifest.json">
+
+<meta
+    name="theme-color"
+    content="#020617"
+/>
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Fight Timer</title>
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#020617">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fight Timer">
+
+<link rel="apple-touch-icon" href="icon-192.png">
 
 <style>
 *{
@@ -355,7 +373,6 @@ let currentLabel = "🥊 Round";
 let wakeLock = null;
 
 const startAudio = new Audio("start.mp3");
-const endAudio = new Audio("endd.mp3");
 
 const AudioContextClass =
     window.AudioContext ||
@@ -366,7 +383,6 @@ const audioCtx = AudioContextClass
     : null;
 
 startAudio.preload = "auto";
-endAudio.preload = "auto";
 
 function playTone({
     frequency = 660,
@@ -420,8 +436,12 @@ function playStartSound() {
     startAudio.currentTime = 0;
     startAudio.play();
 }
-    
+
 function playEndSound() {
+
+    if(navigator.vibrate){
+        navigator.vibrate([200,100,200]);
+    }
 
     const audio = new Audio("endd.mp3");
 
@@ -432,7 +452,8 @@ function playEndSound() {
         console.log("Erro no endAudio:", err);
     });
 
-}    
+}
+    
 function playCountdownSound() {
 
     if(!audioCtx) return;
@@ -819,6 +840,17 @@ async function releaseScreen() {
     }
 }
 
+if("serviceWorker" in navigator){
+
+    navigator.serviceWorker
+        .register("sw.js")
+        .then(() => {
+            console.log(
+                "Service Worker registrado"
+            );
+        });
+
+}
 
 renderQueue();
 updateUI();
