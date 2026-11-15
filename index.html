@@ -422,15 +422,9 @@ function playStartSound() {
 }
 
 function playEndSound() {
-    endAudio.pause();
-    endAudio.currentTime = 0;
-    endAudio.load();
-    
-    endAudio.playbackRate = 2;
 
-    endAudio.play().catch(err => {
-        console.log("Erro no endAudio:", err);
-    });
+    document.body.style.background = "red";
+
 }
 
 function playCountdownSound() {
