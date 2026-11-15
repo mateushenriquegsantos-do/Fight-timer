@@ -420,15 +420,19 @@ function playStartSound() {
     startAudio.currentTime = 0;
     startAudio.play();
 }
+    
 function playEndSound() {
 
     const audio = new Audio("end.mp3");
 
-    audio.playbackRate = 2;
+    audio.volume = 1;
 
-    audio.play();
+    audio.play().catch(err => {
+        console.log("ERRO:", err);
+    });
 
 }
+    
 function playCountdownSound() {
 
     if(!audioCtx) return;
