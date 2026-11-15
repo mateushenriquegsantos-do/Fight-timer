@@ -422,45 +422,11 @@ function playStartSound() {
 }
 function playEndSound() {
 
-    if(!audioCtx) return;
+    const audio = new Audio("end.mp3");
 
-    for(let i = 0; i < 3; i++){
+    audio.playbackRate = 2;
 
-        setTimeout(() => {
-
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(
-                400,
-                audioCtx.currentTime
-            );
-
-            gain.gain.setValueAtTime(
-                0.010,
-                audioCtx.currentTime
-            );
-
-            gain.gain.exponentialRampToValueAtTime(
-                0.35,
-                audioCtx.currentTime + 0.01
-            );
-
-            gain.gain.exponentialRampToValueAtTime(
-                0.010,
-                audioCtx.currentTime + 0.18
-            );
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.18);
-
-        }, i * 220);
-
-    }
+    audio.play();
 
 }
 function playCountdownSound() {
