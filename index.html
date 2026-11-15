@@ -424,6 +424,7 @@ function playStartSound() {
 function playEndSound() {
     endAudio.pause();
     endAudio.currentTime = 0;
+    startAudio.play();
     endAudio.playbackRate = 2;
 
     endAudio.play().catch(err => {
@@ -535,7 +536,7 @@ function startInterval(){
 
             seconds--;
 
-            if(soundOn && seconds === 0 && currentLabel === "🥊 Round"){
+            if(soundOn && seconds === 1 && currentLabel === "🥊 Round"){
                 playEndSound();
             }
 
