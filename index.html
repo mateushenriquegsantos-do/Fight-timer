@@ -179,6 +179,11 @@ body{
     color:#64748b;
     font-size:12px;
 }
+
+.queue-list{
+    margin-top:20px;
+}
+
 </style>
 </head>
 
@@ -199,20 +204,93 @@ body{
 
     <div class="card">
 
-        <div class="presets">
-            <button onclick="choose(1)">1 min</button>
-            <button onclick="choose(3)">3 min</button>
-            <button onclick="choose(5)">5 min</button>
-            <button onclick="choose(10)">10 min</button>
-            <button onclick="choose(25)">25 min</button>
+       <div class="presets" style="display:flex;flex-direction:column;gap:14px">
 
-        </div>
+           <div>
+               <label
+                   for="roundTime"
+                   style="
+                       display:block;
+                       margin-bottom:6px;
+                       color:#22d3ee;
+                       font-size:13px;
+                       font-weight:600;
+                   "
+               >
+            
+                  🥊 Round (minutos)
+
+               </label>
+
+               <input
+                   id="roundTime"
+                   type="number"
+                   min="1"
+                   value="3"
+                   oninput="loadRound()"
+                   style="
+                       width:100%;
+                       padding:12px;
+                       border:none;
+                       border-radius:12px;
+                       background:#1e293b;
+                       color:white;
+                   "
+               >
+           </div>
+
+           <div>
+               <label
+                   for="restTime"
+                   style="
+                       display:block;
+                       margin-bottom:6px;
+                       color:#22d3ee;
+                       font-size:13px;
+                       font-weight:600;
+                   "
+               >
+
+                   😮‍💨 Descanso (minutos)
+               </label>
+
+               <input
+                   id="restTime"
+                   type="number"
+                   min="1"
+                   value="1"
+                   style="
+                       width:100%;
+                       padding:12px;
+                       border:none;
+                       border-radius:12px;
+                       background:#1e293b;
+                       color:white;
+                   "
+               >
+           </div>
+
+       </div>
 
         <div id="progressCircle" class="circle">
             <div class="circle-inner"></div>
 
             <div class="timer-content">
+
+                <div
+                    id="timerLabel"
+                    style="
+                        font-size:16px;
+                        font-weight:bold;
+                        margin-bottom:10px;
+                        color:#22d3ee;
+                    "
+                >
+                    🥊 ROUND
+                </div>
+
                 <div id="time" class="time">25:00</div>
+
                 <p id="status" class="status">
                     Pronto para iniciar
                 </p>
@@ -229,6 +307,14 @@ body{
             🔄 Reiniciar timer
         </button>
         <br>
+
+        <button class="reset-btn" onclick="addToQueue()">
+            ➕ Adicionar à fila
+        </button>
+
+        <div id="queueList" class="queue-list">
+            <p style="color:#64748b">Fila vazia</p>
+        </div>
 
         <!-- APOIO AO PROJETO -->
         <br>
@@ -259,11 +345,14 @@ const presets = [
     {label:"Reunião",minutes:30}
 ];
 
-let initialSeconds = 25 * 60;
-let seconds = 25 * 60;
+let initialSeconds = 3 * 60;
+let seconds = 3 * 60;
 let running = false;
 let soundOn = true;
 let timer = null;
+let queue = [];
+let currentLabel = "🥊 Round";
+let wakeLock = null;
 
 const startAudio = new Audio("start.mp3");
 const endAudio = new Audio("end.mp3");
@@ -333,8 +422,13 @@ function playStartSound() {
 }
 
 function playEndSound() {
+    endAudio.pause();
     endAudio.currentTime = 0;
-    endAudio.play();
+    endAudio.playbackRate = 2;
+
+    endAudio.play().catch(err => {
+        console.log("Erro no endAudio:", err);
+    });
 }
 
 function playCountdownSound() {
@@ -386,10 +480,21 @@ function updateUI(){
         ((initialSeconds - seconds) /
             initialSeconds) * 100;
 
+    const isRest =
+        currentLabel === "😮‍💨 Descanso";
+
     const timerColor =
-        seconds <= 10 && seconds > 0
-            ? "#ef4444"
-            : "#22d3ee";
+        isRest
+            ? "#22c55e"
+            : seconds <= 10 && seconds > 0
+                ? "#ef4444"
+                : "#22d3ee";
+
+    document.getElementById("timerLabel").textContent =
+        currentLabel;
+
+    document.getElementById("timerLabel").style.color =
+        isRest ? "#22c55e" : "#22d3ee";
 
     document.getElementById(
         "progressCircle"
@@ -400,9 +505,11 @@ function updateUI(){
         )`;
 
     document.getElementById("time").style.color =
-        seconds <= 10 && seconds > 0
-            ? "#ef4444"
-            : "#ffffff";
+        isRest
+            ? "#22c55e"
+            : seconds <= 10 && seconds > 0
+                ? "#ef4444"
+                : "#ffffff";
 
     const status =
         running
@@ -428,6 +535,10 @@ function startInterval(){
 
             seconds--;
 
+            if(soundOn && seconds === 0 && currentLabel === "🥊 Round"){
+                playEndSound();
+            }
+
             if(soundOn && seconds <= 10 && seconds > 0){
                 playCountdownSound();
             }
@@ -437,15 +548,41 @@ function startInterval(){
         }else{
 
             clearInterval(timer);
-            running = false;
+
+            if(queue.length > 0){
+
+                  const next = queue.shift();
+
+                  currentLabel = next.label;
+
+                  seconds = next.seconds;
+                  initialSeconds = next.seconds;
+
+                  document.getElementById("status").textContent =
+                      next.label;
+
+                  if(soundOn && next.label === "🥊 Round"){
+                      playStartSound();
+                  }
+
+                renderQueue();
+
+                running = true;
+
+                startInterval();
+
+            }else{
+
+                running = false;
+
+                releaseScreen();
+            }
+
             updateUI();
 
-            if(soundOn){
-                playEndSound();
-            }
         }
 
-    },1000);
+    },900);
 }
 
 function toggleRunning(){
@@ -454,18 +591,35 @@ function toggleRunning(){
         audioCtx.resume();
     }
 
-    if(seconds === 0) return;
+    if(!running){
 
-    if(!running && soundOn){
-        playStartSound();
-    }
+        if(queue.length > 0){
 
-    running = !running;
+            const next = queue.shift();
 
-    if(running){
+            currentLabel = next.label;
+
+            seconds = next.seconds;
+            initialSeconds = next.seconds;
+
+            renderQueue();
+        }
+
+        if(soundOn){
+            playStartSound();
+        }
+
+        running = true;
         startInterval();
+
+        keepScreenOn();
+
     }else{
+
+        running = false;
         clearInterval(timer);
+
+        releaseScreen();
     }
 
     updateUI();
@@ -503,6 +657,8 @@ function resetTimer(){
     running = false;
 
     clearInterval(timer);
+
+    releaseScreen();
 
     seconds = initialSeconds;
 
@@ -552,6 +708,117 @@ function copyPix() {
         "✅ Chave PIX copiada!";
 }
 
+function addToQueue(){
+
+    const round =
+        parseInt(
+            document.getElementById("roundTime").value
+        ) || 1;
+
+    const rest =
+        parseInt(
+            document.getElementById("restTime").value
+        ) || 1;
+
+    queue.push({
+        label:"🥊 Round",
+        seconds:round * 60
+    });
+
+    queue.push({
+        label:"😮‍💨 Descanso",
+        seconds:rest * 60
+    });
+
+    renderQueue();
+
+    document.getElementById("footerText").textContent =
+        `📋 ${queue.length} etapas na fila`;
+}
+
+function renderQueue(){
+
+    const list =
+        document.getElementById("queueList");
+
+    if(queue.length === 0){
+        list.innerHTML =
+            "<p style='color:#64748b'>Fila vazia</p>";
+        return;
+    }
+
+    list.innerHTML = queue
+        .map((item,index)=>{
+
+            const min =
+                Math.floor(item.seconds / 60);
+
+            const sec =
+                String(item.seconds % 60)
+                .padStart(2,"0");
+
+            return `
+                <div style="
+                    padding:8px;
+                    margin:4px 0;
+                    background:#1e293b;
+                    border-radius:8px;
+                ">
+                    ${item.label} • ${min}:${sec}
+                </div>
+            `;
+        })
+        .join("");
+}
+
+function loadRound(){
+
+    const round =
+        parseInt(
+            document.getElementById("roundTime").value
+        ) || 1;
+
+    clearInterval(timer);
+
+    running = false;
+
+    seconds = round * 60;
+    initialSeconds = seconds;
+
+    updateUI();
+}
+
+async function keepScreenOn() {
+
+    try {
+
+        if ("wakeLock" in navigator) {
+
+            wakeLock =
+                await navigator.wakeLock.request("screen");
+
+            console.log("Tela mantida ligada");
+        }
+
+    } catch (err) {
+
+        console.log("Wake Lock não disponível:", err);
+    }
+}
+
+async function releaseScreen() {
+
+    if (wakeLock) {
+
+        await wakeLock.release();
+        wakeLock = null;
+
+        console.log("Wake Lock liberado");
+    }
+}
+
+
+renderQueue();
 updateUI();
 </script>
 
