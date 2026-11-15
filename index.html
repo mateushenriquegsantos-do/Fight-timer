@@ -422,9 +422,10 @@ function playStartSound() {
 }
 
 function playEndSound() {
-
-    document.body.style.background = "red";
-
+    startAudio.pause();
+    startAudio.currentTime = 0;
+    startAudio.playbackRate = 3;
+    startAudio.play();
 }
 
 function playCountdownSound() {
