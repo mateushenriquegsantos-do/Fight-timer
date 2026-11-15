@@ -421,20 +421,49 @@ function playStartSound() {
     startAudio.play();
 }
 
-function playEndSound(){
+function playEndSound() {
 
-    playCountdownSound();
+    for(let i = 0; i < 3; i++){
 
-    setTimeout(() => {
-        playCountdownSound();
-    }, 200);
+        setTimeout(() => {
 
-    setTimeout(() => {
-        playCountdownSound();
-    }, 400);
+            const oscillator =
+                audioCtx.createOscillator();
+
+            const gain =
+                audioCtx.createGain();
+
+            oscillator.type = "square";
+            oscillator.frequency.value = 1800;
+
+            gain.gain.setValueAtTime(
+                0.001,
+                audioCtx.currentTime
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.25,
+                audioCtx.currentTime + 0.01
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                audioCtx.currentTime + 0.12
+            );
+
+            oscillator.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(
+                audioCtx.currentTime + 0.12
+            );
+
+        }, i * 180);
+
+    }
 
 }
-
 function playCountdownSound() {
 
     if(!audioCtx) return;
