@@ -431,7 +431,7 @@ function playEndSound() {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
 
-            osc.type = "sawtooth";
+            osc.type = "sine";
             osc.frequency.setValueAtTime(
                 400,
                 audioCtx.currentTime
