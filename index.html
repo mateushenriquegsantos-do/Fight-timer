@@ -423,16 +423,16 @@ function playStartSound() {
     
 function playEndSound() {
 
-    const audio = new Audio("end.mp3");
+    const audio = new Audio("start.mp3");
 
     audio.volume = 1;
+    audio.playbackRate = 2;
 
     audio.play().catch(err => {
-        console.log("ERRO:", err);
+        console.log("Erro no endAudio:", err);
     });
 
-}
-    
+}    
 function playCountdownSound() {
 
     if(!audioCtx) return;
