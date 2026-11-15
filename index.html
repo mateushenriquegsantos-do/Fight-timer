@@ -422,10 +422,10 @@ function playStartSound() {
 }
 
 function playEndSound() {
-    startAudio.pause();
-    startAudio.currentTime = 0;
-    startAudio.playbackRate = 3;
-    startAudio.play();
+    endAudio.pause();
+    endAudio.currentTime = 0;
+    
+    endAudio.playbackRate = 2;
 }
 
 function playCountdownSound() {
