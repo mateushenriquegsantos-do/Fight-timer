@@ -424,7 +424,6 @@ function playStartSound() {
 function playEndSound() {
     endAudio.pause();
     endAudio.currentTime = 0;
-    startAudio.play();
     endAudio.playbackRate = 2;
 
     endAudio.play().catch(err => {
