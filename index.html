@@ -270,7 +270,7 @@ body{
                <input
                    id="restTime"
                    type="number"
-                   min="1"
+                   min="0"
                    value="1"
                    style="
                        width:100%;
@@ -440,13 +440,10 @@ function playEndSound() {
 
     const endAudio = new Audio("endd.mp3");
 
-    endAudio.preload = "auto";
-
-    endAudio.pause();
-    endAudio.currentTime = 0;
+    endAudio.volume = 1;
     endAudio.playbackRate = 2;
 
-    audio.play().catch(err => {
+    endAudio.play().catch(err => {
         console.log("Erro no endAudio:", err);
     });
 
@@ -731,30 +728,33 @@ function copyPix() {
 
 function addToQueue(){
 
-    const round =
-        parseInt(
-            document.getElementById("roundTime").value
-        ) || 1;
+    const round = Number(
+        document.getElementById("roundTime").value
+    );
 
-    const rest =
-        parseInt(
-            document.getElementById("restTime").value
-        ) || 1;
+    const rest = Number(
+        document.getElementById("restTime").value
+    );
 
     queue.push({
         label:"🥊 Round",
         seconds:round * 60
     });
 
-    queue.push({
-        label:"😮‍💨 Descanso",
-        seconds:rest * 60
-    });
+    if(rest > 0){
+
+        queue.push({
+            label:"😮‍💨 Descanso",
+            seconds:rest * 60
+        });
+
+    }
 
     renderQueue();
 
     document.getElementById("footerText").textContent =
         `📋 ${queue.length} etapas na fila`;
+
 }
 
 function renderQueue(){
